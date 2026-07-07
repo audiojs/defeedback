@@ -1,0 +1,19 @@
+{
+  "name": "@audio/defeedback-notchbank",
+  "version": "0.0.0",
+  "description": "Adaptive notch bank — pooled biquad notches with click-free coefficient interpolation",
+  "type": "module",
+  "sideEffects": false,
+  "private": true,
+  "keywords": [
+    "audio",
+    "dsp",
+    "feedback",
+    "notchbank"
+  ],
+  "license": "MIT",
+  "author": "Dmitry Iv. <dfcreative@gmail.com>",
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "@audio/defeedback",
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "description": "Adaptive feedback suppression — umbrella for @audio/defeedback-* atoms (analyzer, tracker, notch bank)",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "keywords": [
+    "audio",
+    "dsp",
+    "feedback",
+    "howling",
+    "notch",
+    "live-sound"
+  ],
+  "license": "MIT",
+  "author": "Dmitry Iv. <dfcreative@gmail.com>",
+  "engines": {
+    "node": ">=18"
+  }
+}
