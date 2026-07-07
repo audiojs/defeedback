@@ -1,11 +1,15 @@
 # @audio/defeedback
 
-> Adaptive feedback (howling) suppression for live sound. All planned — and newly cheap.
+> Adaptive feedback (howling) suppression — live-sound AFS class, **zero-latency direct path**.
 
-| Package | What | Builds on |
-|---|---|---|
-| `@audio/defeedback-analyzer` | spectral peak + howl criteria (PHPR/PNPR) | `fourier-transform`, `@audio/spectral-crest`/`-flux` |
-| `@audio/defeedback-tracker` | trajectory + growth rate, music discrimination | new (~150 lines) |
-| `@audio/defeedback-notchbank` | ≤12 pooled notches, Q 30–50, −6…−12 dB, click-free interpolation | `@audio/filter-biquad` notch coefs |
+| Package | What |
+|---|---|
+| `@audio/defeedback-analyzer` | spectral peaks + PNPR/PHPR howl criteria, parabolic freqs, relational harmonic gate (Waterschoot & Moonen 2011) |
+| `@audio/defeedback-tracker` | persistence/stability/growth gating — the music discriminator |
+| `@audio/defeedback-notchbank` | ≤12 pooled narrow IIR cuts, click-free coefficient morphing, deepen-on-redeploy |
 
-Loop: analyze → track → deploy/release notches (site-todo design). **Offline MVP is a composition exercise now** — every DSP primitive exists; the genuinely new code is the tracker and coefficient interpolation. Real-time (mic→Dante→speakers) waits on the audio-module worklet contract. Reference: van Waterschoot & Moonen, "Fifty years of acoustic feedback control" (2011).
+The umbrella exports a streaming factory: `defeedback({fs, strength}) → {process(chunk), notches()}`. The audio path is pure IIR notches (0 samples latency); detection runs on the **post-notch** signal in parallel, so an insufficient notch deepens itself.
+
+Verified by tests: a growing howl over music is suppressed ≥12 dB while the music stays ±1 dB; harmonic-rich tones deploy zero notches; and a **closed electro-acoustic loop simulation** (resonant room, loop gain > 1) runs away without the suppressor and stays bounded with it inline.
+
+Design notes: detection must catch the howl pre-saturation (a clipped howl grows harmonics and reads as musical — same physics limits every AFS). Alpha Labs DeFeedback-class ML suppression (speech-trained model) is a different lane — see `@audio/neural`.

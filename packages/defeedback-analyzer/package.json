@@ -1,19 +1,33 @@
 {
   "name": "@audio/defeedback-analyzer",
-  "version": "0.0.0",
-  "description": "Feedback candidate detection — spectral peaks + PHPR/PNPR howl criteria (Waterschoot & Moonen 2011)",
+  "version": "1.0.0",
+  "description": "Feedback candidate detection — spectral peaks with PNPR/PHPR howl criteria (Waterschoot & Moonen 2011)",
   "type": "module",
   "sideEffects": false,
-  "private": true,
+  "main": "analyzer.js",
+  "exports": {
+    ".": "./analyzer.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "analyzer.js"
+  ],
+  "dependencies": {
+    "fourier-transform": "^2.2.0"
+  },
   "keywords": [
     "audio",
     "dsp",
     "feedback",
+    "howling",
     "analyzer"
   ],
   "license": "MIT",
   "author": "Dmitry Iv. <dfcreative@gmail.com>",
   "engines": {
     "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
