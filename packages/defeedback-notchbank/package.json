@@ -1,6 +1,6 @@
 {
   "name": "@audio/defeedback-notchbank",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Adaptive notch bank — pooled narrow IIR cuts, click-free coefficient morphing, deepen-on-redeploy",
   "type": "module",
   "sideEffects": false,
@@ -13,7 +13,7 @@
     "notchbank.js"
   ],
   "dependencies": {
-    "digital-filter": "^2.0.0"
+    "@audio/biquad": "^1.1.0"
   },
   "keywords": [
     "audio",

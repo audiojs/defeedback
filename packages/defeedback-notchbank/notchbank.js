@@ -3,7 +3,7 @@
 // coefficients linearly over a short ramp, so there are no clicks. A repeated deploy
 // on the same frequency deepens the cut (residual howl still growing → cut harder).
 
-import { peaking } from 'digital-filter/iir/biquad.js'
+import { peaking } from '@audio/biquad'
 
 const IDENTITY = { b0: 1, b1: 0, b2: 0, a1: 0, a2: 0 }
 
