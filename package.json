@@ -1,6 +1,6 @@
 {
   "name": "@audio/defeedback",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "sideEffects": false,
   "description": "Adaptive feedback suppression — umbrella for @audio/defeedback-* atoms (analyzer, tracker, notch bank)",
@@ -23,10 +23,12 @@
   "main": "index.js",
   "exports": {
     ".": "./index.js",
+    "./atom": "./atom.js",
     "./package.json": "./package.json"
   },
   "files": [
-    "index.js"
+    "index.js",
+    "atom.js"
   ],
   "scripts": {
     "test": "node test.js",
@@ -43,5 +45,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "atom": "./atom.js"
 }
