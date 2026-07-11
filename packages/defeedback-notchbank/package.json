@@ -1,6 +1,6 @@
 {
   "name": "@audio/defeedback-notchbank",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Adaptive notch bank — pooled narrow IIR cuts, click-free coefficient morphing, deepen-on-redeploy",
   "type": "module",
   "sideEffects": false,
@@ -10,7 +10,8 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "notchbank.js"
+    "notchbank.js",
+    "notchbank.d.ts"
   ],
   "dependencies": {
     "@audio/biquad": "^1.1.0"
@@ -34,5 +35,7 @@
     "type": "git",
     "url": "git+https://github.com/audiojs/defeedback.git",
     "directory": "packages/defeedback-notchbank"
-  }
+  },
+  "types": "./notchbank.d.ts",
+  "funding": "https://github.com/sponsors/audiojs"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@audio/defeedback-analyzer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Feedback candidate detection — spectral peaks with PNPR/PHPR howl criteria (Waterschoot & Moonen 2011)",
   "type": "module",
   "sideEffects": false,
@@ -10,7 +10,8 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "analyzer.js"
+    "analyzer.js",
+    "analyzer.d.ts"
   ],
   "dependencies": {
     "fourier-transform": "^2.2.0"
@@ -34,5 +35,7 @@
     "type": "git",
     "url": "git+https://github.com/audiojs/defeedback.git",
     "directory": "packages/defeedback-analyzer"
-  }
+  },
+  "types": "./analyzer.d.ts",
+  "funding": "https://github.com/sponsors/audiojs"
 }

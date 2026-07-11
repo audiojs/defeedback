@@ -1,6 +1,6 @@
 {
   "name": "@audio/defeedback-tracker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Howl trajectory tracking — persistence + stability + narrowness gates; music discriminator",
   "type": "module",
   "sideEffects": false,
@@ -10,7 +10,8 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "tracker.js"
+    "tracker.js",
+    "tracker.d.ts"
   ],
   "keywords": [
     "audio",
@@ -31,5 +32,7 @@
     "type": "git",
     "url": "git+https://github.com/audiojs/defeedback.git",
     "directory": "packages/defeedback-tracker"
-  }
+  },
+  "types": "./tracker.d.ts",
+  "funding": "https://github.com/sponsors/audiojs"
 }
