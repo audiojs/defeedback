@@ -22,13 +22,20 @@
   },
   "main": "index.js",
   "exports": {
-    ".": "./index.js",
-    "./audio": "./audio.js",
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./audio": {
+      "types": "./audio.d.ts",
+      "default": "./audio.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
     "index.js",
-    "audio.js"
+    "audio.js",
+    "*.d.ts"
   ],
   "scripts": {
     "test": "node test.js",
@@ -51,5 +58,6 @@
     "type": "git",
     "url": "git+https://github.com/audiojs/defeedback.git"
   },
-  "funding": "https://github.com/sponsors/audiojs"
+  "funding": "https://github.com/sponsors/audiojs",
+  "types": "./index.d.ts"
 }
