@@ -13,7 +13,7 @@ import notchbank from '@audio/defeedback-notchbank'
 A pool of narrow peaking-EQ cuts sitting directly in the signal path — pure IIR, **zero added latency**. `deploy(freq)` activates a free slot at that frequency (or, if the pool is full, steals the shallowest cut); a repeated `deploy` at a frequency already covered deepens that notch instead of adding a new one (residual howl still growing → cut harder, down to `maxDepth`). Coefficients morph linearly over `ramp` samples on every deploy, so cuts fade in/deepen without clicks.
 
 ```js
-let notches = notchbank({ fs: 48000, size: 12, q: 30, depth: -9 })
+let notches = notchbank({ fs: 48000, size: 12, Q: 30, depth: -9 })
 
 notches.deploy(2340)              // cut a howl at 2340 Hz
 let out = notches.process(chunk)  // apply the active cuts, in place
@@ -24,7 +24,7 @@ notches.notches()                 // → [{ freq, gain }, ...] currently active
 |---|---|---|
 | `fs` | `44100` | Hz |
 | `size` | `12` | pooled notch slots |
-| `q` | `30` | notch Q (sharpness) |
+| `Q` | `30` | notch Q (sharpness; `q` still accepted) |
 | `depth` | `-9` | dB cut per `deploy` call |
 | `maxDepth` | `-24` | dB, deepest a single notch can reach |
 | `ramp` | `256` | samples, coefficient morph length |

@@ -11,7 +11,7 @@ export const defeedback = (ctx) => {
 	for (let c = 0, N = ctx.maxChannels ?? 8; c < N; c++) chans.push(defeedbackFn({
 		fs: ctx.sampleRate,
 		maxNotches: ctx.params.notches[0] | 0,
-		q: ctx.params.q[0],
+		Q: ctx.params.Q[0],
 		strength: ctx.params.strength[0],
 	}))
 	return (inputs, outputs) => {
@@ -26,6 +26,6 @@ export const defeedback = (ctx) => {
 defeedback.channels = 'any'
 defeedback.params = {
 	notches:  { type: 'number', min: 1, max: 24, default: 12, step: 1, flags: ['restart'] },
-	q:        { type: 'number', min: 10, max: 100, default: 30, curve: 'log', flags: ['restart'] },
+	Q:        { type: 'number', min: 10, max: 100, default: 30, curve: 'log', flags: ['restart'], alias: 'q' },
 	strength: { type: 'number', min: 0, max: 1, default: 1, flags: ['restart'] },
 }

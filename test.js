@@ -35,6 +35,25 @@ test('kills a growing howl, leaves the music ±1 dB', () => {
 	ok(d.every(isFinite))
 })
 
+test('block size does not move the notches — output identical under any chunking', () => {
+	// The whole chunk used to be filtered before the sidechain ran, so a notch deployed
+	// mid-chunk cut from the next call on: its onset depended on the host block size
+	let n = 2 * fs, x = saw(220, n)
+	for (let i = 0; i < n; i++) x[i] += 10 ** ((-40 + 30 * i / n) / 20) * Math.sin(2 * Math.PI * 3127 * i / fs)
+	let run = block => {
+		let d = Float32Array.from(x), df = defeedback({ fs })
+		for (let pos = 0; pos < n; pos += block) df.process(d.subarray(pos, Math.min(n, pos + block)))
+		return d
+	}
+	let ref = run(4096)
+	ok(defeedback({ fs }).process(Float32Array.from(x)).some((v, i) => v !== x[i]), 'notches engage')
+	for (let block of [1, 64, 997, 1024]) {
+		let d = run(block), m = 0
+		for (let i = 0; i < n; i++) m = Math.max(m, Math.abs(d[i] - ref[i]))
+		is(m, 0, `block ${block} ≡ block 4096`)
+	}
+})
+
 test('music protection — steady harmonic-rich tone deploys no notches', () => {
 	let d = saw(400, 2 * fs, 0.5)
 	let df = defeedback({ fs })
@@ -75,4 +94,13 @@ test('closed loop — unstable without, stable with (zero-latency path)', () => 
 	let tamed = runLoop(defeedback({ fs }))
 	ok(wild > 1.5, 'without suppression the loop runs away (peak ' + wild.toFixed(2) + ')')
 	ok(tamed < 0.5, 'with suppression it stays bounded (peak ' + tamed.toFixed(3) + ')')
+})
+
+test('Q — former option name q still works, on the suppressor and its notch bank', () => {
+	let x = saw(220, fs)
+	for (let i = 0; i < fs; i++) x[i] += 0.3 * Math.sin(2 * Math.PI * 3127 * i / fs)
+	let a = defeedback({ fs, Q: 50 }).process(Float32Array.from(x)), b = defeedback({ fs, q: 50 }).process(Float32Array.from(x))
+	ok(a.every((v, i) => v === b[i]), 'defeedback: { q } ≡ { Q }')
+	let c = defeedback({ fs }).process(Float32Array.from(x))
+	ok(a.some((v, i) => v !== c[i]), 'Q changes the notches')
 })

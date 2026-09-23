@@ -8,11 +8,12 @@ import { peaking } from '@audio/biquad'
 const IDENTITY = { b0: 1, b1: 0, b2: 0, a1: 0, a2: 0 }
 
 /**
- * @param {object} opts — { fs=44100, size=12, q=30, depth=-9 (dB per deploy),
+ * @param {object} opts — { fs=44100, size=12, Q=30 (`q`: former name), depth=-9 (dB per deploy),
  *   maxDepth=-24, ramp=256 (samples coefficient morph) }
  * @returns {{ process(chunk): chunk, deploy(freq): void, notches(): Array }}
  */
-export default function notchbank ({ fs = 44100, size = 12, q = 30, depth = -9, maxDepth = -24, ramp = 256 } = {}) {
+export default function notchbank ({ fs = 44100, size = 12, Q, q, depth = -9, maxDepth = -24, ramp = 256 } = {}) {
+	Q ??= q ?? 30
 	let slots = Array.from({ length: size }, () => ({
 		freq: 0, gain: 0,
 		cur: { ...IDENTITY }, from: { ...IDENTITY }, to: { ...IDENTITY },
@@ -41,7 +42,7 @@ export default function notchbank ({ fs = 44100, size = 12, q = 30, depth = -9, 
 				slot.freq = freq
 				slot.gain = depth
 			}
-			morph(slot, peaking(slot.freq, q, fs, slot.gain))
+			morph(slot, peaking(slot.freq, Q, fs, slot.gain))
 		},
 		process (chunk) {
 			for (let s of slots) {

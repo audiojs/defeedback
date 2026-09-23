@@ -4,6 +4,8 @@ export interface NotchbankOptions {
   /** pooled notch slots, default 12 */
   size?: number
   /** notch Q (sharpness), default 30 */
+  Q?: number
+  /** @deprecated former name of `Q` */
   q?: number
   /** dB cut applied per `deploy` call, default -9 */
   depth?: number

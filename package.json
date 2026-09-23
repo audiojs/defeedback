@@ -1,6 +1,6 @@
 {
   "name": "@audio/defeedback",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "type": "module",
   "sideEffects": false,
   "description": "Adaptive feedback suppression — umbrella for @audio/defeedback-* atoms (analyzer, tracker, notch bank)",
@@ -45,7 +45,7 @@
   "dependencies": {
     "@audio/defeedback-analyzer": "^1.0.0",
     "@audio/defeedback-tracker": "^1.0.0",
-    "@audio/defeedback-notchbank": "^1.0.0"
+    "@audio/defeedback-notchbank": "^1.2.0"
   },
   "devDependencies": {
     "tst": "^9.4.0"
