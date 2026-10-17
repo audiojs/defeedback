@@ -1,6 +1,6 @@
 {
   "name": "@audio/defeedback",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "type": "module",
   "sideEffects": false,
   "description": "Adaptive feedback suppression — umbrella for @audio/defeedback-* atoms (analyzer, tracker, notch bank)",
@@ -30,21 +30,28 @@
       "types": "./audio.d.ts",
       "default": "./audio.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./*": {
+      "types": "./members/*.d.ts",
+      "default": "./members/*.js"
+    }
   },
   "files": [
     "index.js",
     "audio.js",
-    "*.d.ts"
+    "*.d.ts",
+    "members/"
   ],
   "scripts": {
     "test": "node test.js",
     "test:all": "npm test --workspaces --if-present && npm test",
-    "publish:all": "npm publish --workspaces && npm publish"
+    "publish:all": "npm publish --workspaces && npm publish",
+    "members": "node scripts/members.js",
+    "prepublishOnly": "node scripts/members.js --check"
   },
   "dependencies": {
-    "@audio/defeedback-analyzer": "^1.0.0",
-    "@audio/defeedback-tracker": "^1.0.0",
+    "@audio/defeedback-analyzer": "^1.0.1",
+    "@audio/defeedback-tracker": "^1.0.1",
     "@audio/defeedback-notchbank": "^1.2.0"
   },
   "devDependencies": {
