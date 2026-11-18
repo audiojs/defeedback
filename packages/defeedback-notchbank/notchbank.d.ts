@@ -13,6 +13,8 @@ export interface NotchbankOptions {
   maxDepth?: number
   /** samples, coefficient morph length on every deploy/deepen (click-free), default 256 */
   ramp?: number
+  /** slots made, the most `cfg[2]` may put in use, default `size` */
+  slots?: number
 }
 
 /** A single active (or inactive) notch slot's public state. */
@@ -30,6 +32,12 @@ export interface NotchbankInstance {
   deploy(freq: number): void
   /** Currently active notches. */
   notches(): Notch[]
+  /** Apply the cuts to chunk[from..to) in place (allocation-free). */
+  run(chunk: Float32Array | Float64Array, from: number, to: number): void
+  /** Read `cfg` anew: a changed Q morphs the active notches to their new shape, slots past the count in use morph flat and go. */
+  retune(): void
+  /** [Q, dB cut per deploy, slots in use]: write between calls, then `retune()` */
+  cfg: Float64Array
 }
 
 /** Zero-latency (pure IIR) pooled notch bank for the direct signal path. */

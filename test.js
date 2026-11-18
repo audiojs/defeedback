@@ -104,3 +104,107 @@ test('Q — former option name q still works, on the suppressor and its notch ba
 	let c = defeedback({ fs }).process(Float32Array.from(x))
 	ok(a.some((v, i) => v !== c[i]), 'Q changes the notches')
 })
+
+import { execFileSync } from 'node:child_process'
+import { peaking } from '@audio/biquad'
+import { defeedback as atom } from './audio.js'
+
+// the howl test's take: a saw and a howl growing from −50 to −10 dBFS
+function howling (n, howlF = 3127) {
+	let d = saw(220, n)
+	for (let i = 0; i < n; i++) d[i] += 10 ** ((-50 + 40 * (i / n)) / 20) * Math.sin(2 * Math.PI * howlF * i / fs)
+	return d
+}
+// the manifest under a host's calls of 128 frames, its values from `at(frame)` (numbers as 1-length Float32Arrays)
+function hosted (x, at = () => ({})) {
+	let values = f => Object.fromEntries(Object.entries(atom.params).map(([k, s]) => [k, Float32Array.of(at(f)[k] ?? s.default)]))
+	let proc = atom({ sampleRate: fs, maxBlockSize: 128, maxChannels: 1, params: values(0) }), out = new Float32Array(x.length)
+	for (let i = 0; i < x.length; i += 128) { let o = out.subarray(i, i + 128); proc([[x.subarray(i, i + 128)]], [[o]], values(i)) }
+	return out
+}
+
+test('manifest: Q is live: a change reshapes the notches deployed, the same bank as @audio/biquad\'s peaking at the new Q (was restart: ignored)', () => {
+	// a bank deployed at Q 30, then Q 60: past the morph its notch is the peaking cut at 60, coefficient for coefficient,
+	// so its output is a bank deployed at 60 from the start, run on the same signal from there
+	let n = 3 * fs, x = howling(n), k = 2 * fs
+	let moved = hosted(x, f => ({ Q: f < k ? 30 : 60 })), still = hosted(x)
+	let diff = 0
+	for (let i = k + 512; i < n; i++) diff = Math.max(diff, Math.abs(moved[i] - still[i]))
+	ok(diff > 1e-3, `heard: ${diff.toFixed(4)}`)
+	// the bank itself: deploy, then a new Q, morphed over its ramp, then its coefficients are peaking's
+	let a = defeedback({ fs, slots: 4 }), b = defeedback({ fs, Q: 60, slots: 4 }), y = new Float32Array(1024)
+	for (let i = 0; i < 4; i++) a.process(Float32Array.from(howling(2048)))
+	let f0 = a.notches()[0]
+	ok(f0, `a notch deployed: ${f0 && f0.freq.toFixed(1)} Hz, ${f0 && f0.gain.toFixed(1)} dB`)
+	a.cfg[0] = 60; a.process(y)
+	let c = peaking(f0.freq, 60, fs, f0.gain), z = Float32Array.from({ length: 512 }, (_, i) => Math.sin(i * 0.7)), za = z.slice(), ref = z.slice()
+	let s1 = 0, s2 = 0, r1 = 0, r2 = 0
+	for (let i = 0; i < ref.length; i++) { let v = ref[i], w = c.b0 * v + c.b1 * s1 + c.b2 * s2 - c.a1 * r1 - c.a2 * r2; s2 = s1; s1 = v; r2 = r1; r1 = w; ref[i] = w }
+	// the bank's filter memory carries the last block; from silence both start alike
+	let quiet = new Float32Array(4096); a.process(quiet); a.process(za)
+	let err = 0
+	for (let i = 0; i < za.length; i++) err = Math.max(err, Math.abs(za[i] - ref[i]))
+	ok(err < 1e-6, `the notch at Q 60 is peaking(f, 60): ${err}`)
+})
+
+test('manifest: strength and notches are live: a new strength cuts the next deploys by it, a smaller pool lets the rest go flat (were restart: ignored)', () => {
+	let n = 3 * fs, x = howling(n)
+	// strength 0 from the start: a deploy cuts 0 dB, a peaking section flat to the rounding (its b1·x1 and a1·y1 cancel)
+	let flat = hosted(x, () => ({ strength: 0 })), dev = 0
+	for (let i = 0; i < n; i++) dev = Math.max(dev, Math.abs(flat[i] - x[i]))
+	ok(dev < 1e-5, `strength 0: the input, to ${dev}`)
+	// from 0 to 1 at 1 s: the howl, uncut until then, is deployed on again and now cut
+	let moved = hosted(x, f => ({ strength: f < fs ? 0 : 1 })), diff = 0
+	for (let i = fs; i < n; i++) diff = Math.max(diff, Math.abs(moved[i] - flat[i]))
+	ok(diff > 1e-3, `strength 0 → 1 at 1 s heard: ${diff.toFixed(4)}`)
+	// one notch deployed on a bank of two slots, then one in use: past the ramp it is gone, the output the input
+	let df = defeedback({ fs, maxNotches: 2, slots: 2 }), d = howling(n)
+	for (let i = 0; i < 2 * fs; i += 256) df.process(d.subarray(i, i + 256))
+	let before = df.notches().length
+	df.cfg[2] = 0
+	let tail = Float32Array.from(d.subarray(2 * fs, 2 * fs + 4096)), kept = tail.slice()
+	df.process(tail.subarray(0, 512))
+	df.process(tail.subarray(512))
+	ok(before >= 1 && df.notches().length === 0, `${before} notch, then none in use: ${df.notches().length} left`)
+	ok(tail.subarray(512).every((v, i) => v === kept[512 + i]), 'past the ramp, the input as it is')
+})
+
+test('notchbank: a new Q leaves a notch that is going flat to go flat: freed, it cuts off nothing', async () => {
+	// the pool shrinks under a deployed notch, then grows back with a new Q before its ramp ends: reshaped, the slot would be
+	// freed holding a whole notch, a step in the output
+	let { notchbank } = await import('./index.js'), b = notchbank({ fs, size: 2, ramp: 256 }), at = 0, y = []
+	let run = n => { let x = Float32Array.from({ length: n }, (_, i) => 0.5 * Math.sin(2 * Math.PI * 1000 * (at + i) / fs)); at += n; b.process(x); y.push(...x) }
+	b.deploy(1000); run(2048)
+	b.cfg[2] = 0; b.retune(); run(64)
+	b.cfg[2] = 2; b.cfg[0] = 60; b.retune(); run(4096); run(1024)
+	let worst = 0, own = 0.5 * (2 * Math.PI * 1000 / fs) ** 2
+	for (let i = 2048 + 66; i < y.length; i++) worst = Math.max(worst, Math.abs(y[i] - 2 * y[i - 1] + y[i - 2]))
+	ok(worst < 1.5 * own && !b.notches().length, `largest second difference ${worst.toExponential(2)}, the tone's own ${own.toExponential(2)}`)
+})
+
+// CONTRACT 1.0, process: "Allocate nothing". A warm process() in a child Node with a 1 MB young generation, counted over
+// 2^16 blocks of 8 frames (a collection is 1 MB, so 16 bytes a block show), under the contract validator's flags, at
+// the defaults and with each param moving every block, one case after another in one process. Where V8 boxes a number
+// moves with its version: measured on Node 20, 22 and 25
+test('manifest: allocates nothing in process, at its defaults and as its params move', { skip: +process.versions.node.split('.')[0] < 20 && 'measured on Node 20 and later' }, () => {
+	let cases = [[], ['notches', 1, 24], ['Q', 10, 100], ['strength', 0, 1]]
+	let child = `
+		import { defeedback as m } from ${JSON.stringify(import.meta.resolve('./audio.js'))}
+		import { PerformanceObserver } from 'node:perf_hooks'
+		let counts = []
+		for (let [key, a, b] of JSON.parse(process.argv[1])) {
+			let given = () => Object.fromEntries(Object.entries(m.params).map(([k, s]) => [k, Float32Array.of(s.default)]))
+			let params = given(), proc = m({ sampleRate: 48000, maxBlockSize: 128, maxChannels: 2, params: given() })
+			let src = [0, 1].map(c => Float32Array.from({ length: 512 }, (_, i) => 0.5 * Math.sin(i * 0.1 + c) + 0.1 * Math.sin(i * 1.7) + 0.05 * Math.sin(i * i * 0.37 + c)))
+			let ins = Array.from({ length: 64 }, (_, k) => [src.map(c => c.subarray(k * 8, k * 8 + 8))]), outs = [[new Float32Array(8), new Float32Array(8)]]
+			let v = key ? params[key] : null, to = Float32Array.of(a ?? 0, b ?? 0)
+			let run = n => { for (let i = 0; i < n; i++) { if (v) v[0] = to[i & 1]; proc(ins[i & 63], outs, params) } }
+			run(1 << 15); globalThis.gc()
+			let gcs = 0, seen = new PerformanceObserver(list => { gcs += list.getEntries().length }); seen.observe({ entryTypes: ['gc'] })
+			run(1 << 16); await new Promise(done => setTimeout(done, 20)); seen.disconnect()
+			counts.push(gcs)
+		}
+		console.log(JSON.stringify(counts))`
+	let counts = JSON.parse(execFileSync(process.execPath, ['--max-semi-space-size=1', '--expose-gc', '--no-concurrent-recompilation', '--input-type=module', '-e', child, JSON.stringify(cases)], { encoding: 'utf8' }))
+	cases.forEach(([key, a, b], k) => is(counts[k], 0, `${key ? `${key} ${a} ↔ ${b} each block` : 'defaults'}: ${counts[k]} collections in 2^16 blocks`))
+})

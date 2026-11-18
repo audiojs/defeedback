@@ -34,3 +34,10 @@ export interface TrackerInstance {
 
 /** Stateful factory — turns per-frame candidates into confirmed howl trajectories (persistence + stability + narrowness gating). */
 export default function tracker(options?: TrackerOptions): TrackerInstance
+
+/** The tracks in typed arrays, room for `cap`, for `updateInto` (allocation-free): `n` tracks; the last update's
+ *  confirmed howls, `h` of them, in `hf` (Hz) and `hl` (dB); `cfg` = [minFrames, pnpr, phpr, freqTol, growth]. */
+export interface Tracks { n: number; h: number; hf: Float64Array; hl: Float64Array; cfg: Float64Array }
+export function tracks(options?: TrackerOptions, cap?: number): Tracks
+/** One hop's candidates (`{ n, freq, level, pnpr, phpr }`, as the analyzer's `candidates`) into the tracks. */
+export function updateInto(T: Tracks, c: { n: number; freq: ArrayLike<number>; level: ArrayLike<number>; pnpr: ArrayLike<number>; phpr: ArrayLike<number> }): void

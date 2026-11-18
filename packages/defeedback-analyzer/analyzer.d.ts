@@ -23,3 +23,10 @@ export interface FeedbackCandidate {
 
 /** Analyze one power-of-2 analysis window (Hann-windowed internally). Returns up to `maxCandidates` peaks, strongest first, after the relational-harmonic gate drops musical overtones. */
 export default function analyze(data: Float32Array, options?: AnalyzerOptions): FeedbackCandidate[]
+
+/** The candidates of a window of `n` samples in typed arrays, for `analyzeInto` (allocation-free): `n` of them, strongest
+ *  first, `freq`, `level`, `pnpr`, `phpr`, `kc` at each index; `cfg` = [fs, maxCandidates, floor]. */
+export interface Candidates { n: number; cfg: Float64Array; freq: Float64Array; level: Float64Array; pnpr: Float64Array; phpr: Float64Array; kc: Float64Array }
+export function candidates(n: number): Candidates
+/** `analyze` into `c` (made by `candidates(data.length)`), allocating nothing. */
+export function analyzeInto(data: Float32Array, c: Candidates): void

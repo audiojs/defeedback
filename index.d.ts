@@ -12,6 +12,8 @@ export interface DefeedbackOptions extends AnalyzerOptions, TrackerOptions, Notc
   hop?: number
   maxNotches?: number
   strength?: number
+  /** notch slots made, the most `cfg[2]` may put in use, default maxNotches */
+  slots?: number
 }
 export interface DefeedbackInstance {
   /** Process any block size in place. */
@@ -19,5 +21,7 @@ export interface DefeedbackInstance {
   notches(): Notch[]
   /** Clear detection tracks; active notch filters and sample history are retained. */
   reset(): void
+  /** The bank's [Q, dB cut per deploy (−9·strength), notches in use], read by each `process` call: write between calls */
+  cfg: Float64Array
 }
 export default function defeedback(options?: DefeedbackOptions): DefeedbackInstance

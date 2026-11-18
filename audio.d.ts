@@ -4,10 +4,10 @@ export interface DefeedbackContext {
   params: { notches: Float32Array; Q: Float32Array; strength: Float32Array }
 }
 export const defeedback: {
-  (ctx: DefeedbackContext): (inputs: Float32Array[][], outputs: Float32Array[][]) => void
+  (ctx: DefeedbackContext): (inputs: Float32Array[][], outputs: Float32Array[][], params: DefeedbackContext['params']) => void
   channels: 'any'
   params: Record<'notches' | 'Q' | 'strength', {
     type: 'number'; min: number; max: number; default: number
-    step?: number; curve?: string; flags: string[]; alias?: string
+    step?: number; curve?: string; alias?: string
   }>
 }
