@@ -30,7 +30,7 @@ notches.notches()                 // → [{ freq, gain }, ...] currently active
 | `ramp` | `256` | samples, coefficient morph length |
 | `slots` | `size` | slots made, the most `cfg[2]` may put in use |
 
-Returns `{ process(chunk): chunk, run(chunk, from, to), deploy(freq): void, notches(): Array<{freq, gain}>, cfg, retune() }`. `process` mutates and returns `chunk` in place; `run` applies the cuts to a range of it. `cfg` is `[Q, depth, slots in use]`: changed between calls, `retune()` morphs every active notch to its new Q and lets slots past the count go flat; a new depth applies to the next deploys. Each slot lives in typed arrays: nothing is allocated while it runs.
+Returns `{ process(chunk): chunk, run(chunk, from, to), deploy(freq): void, notches(): Array<{freq, gain}>, cfg, retune() }`. `process` mutates and returns `chunk` in place; `run` applies the cuts to a range of it. `cfg` is `[Q, depth, slots in use]`: changed between calls, `retune()` morphs every active notch to its new Q and lets slots past the count go flat; a new depth applies to the next deploys. Each slot lives in typed arrays: nothing is allocated while it runs, and one number (16 bytes) at each deploy.
 
 **Use when:** the direct audio path of an AFS chain — pair with [`@audio/defeedback-analyzer`](https://github.com/audiojs/defeedback-analyzer) + [`@audio/defeedback-tracker`](https://github.com/audiojs/defeedback-tracker) to decide *when* to `deploy`.<br>
 **Not for:** detection — this module only applies cuts, it has no howl criteria of its own.

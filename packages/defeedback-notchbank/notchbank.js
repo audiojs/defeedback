@@ -3,11 +3,11 @@
 // coefficients linearly over a short ramp, so there are no clicks. A repeated deploy
 // on the same frequency deepens the cut (residual howl still growing → cut harder).
 //
-// Each slot lives in typed arrays (a number written to an object's field is a new object in V8), so `process`,
-// `run` and `deploy` allocate nothing. The cut is @audio/biquad's `peaking` (RBJ Audio-EQ-Cookbook), its arithmetic
-// written out into the slot's coefficients. `cfg` = [Q, depth, slots in use] may change between calls: a new Q
-// morphs every active notch to its new shape, a new depth applies to the deploys after it, and slots past the count
-// in use morph flat and then go.
+// Each slot lives in typed arrays (a number written to an object's field is a new object in V8), so `process`
+// and `run` allocate nothing, and a `deploy` one number (16 bytes). The cut is @audio/biquad's `peaking` (RBJ
+// Audio-EQ-Cookbook), its arithmetic written out into the slot's coefficients. `cfg` = [Q, depth, slots in use] may
+// change between calls: a new Q morphs every active notch to its new shape, a new depth applies to the deploys after
+// it, and slots past the count in use morph flat and then go.
 
 const PI2 = Math.PI * 2
 

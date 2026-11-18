@@ -20,7 +20,8 @@ export { analyze, tracker, notchbank }
 export default function defeedback ({ fs = 44100, window = 2048, hop = 1024, maxNotches = 12, Q, q, strength = 1, slots, ...rest } = {}) {
 	let bank = notchbank({ fs, size: maxNotches, Q: Q ?? q ?? 30, depth: -9 * strength, slots, ...rest })
 	// the analysis and the tracks in typed arrays (the tracker fed m candidates a hop holds 4m tracks at most), the
-	// samples seen and the count of the next analysis in a Float64Array: process allocates nothing
+	// samples seen and the count of the next analysis in a Float64Array: process allocates nothing but one number (16
+	// bytes) at each deploy of a notch
 	let cand = candidates(window), maxCandidates = rest.maxCandidates ?? 6, trk = tracks(rest, 4 * maxCandidates)
 	cand.cfg[0] = fs; cand.cfg[1] = maxCandidates; cand.cfg[2] = rest.floor ?? -70
 	let ring = new Float32Array(window), frame = new Float32Array(window)
