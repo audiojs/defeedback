@@ -8,6 +8,6 @@ export const defeedback: {
   channels: 'any'
   params: Record<'notches' | 'Q' | 'strength', {
     type: 'number'; min: number; max: number; default: number
-    step?: number; curve?: string; alias?: string
+    step?: number; curve?: 'log'; alias?: string
   }>
 }
